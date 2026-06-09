@@ -1,4 +1,4 @@
-#invoicefrom docx import Document
+from docx import Document
 from docx.shared import Pt, Cm
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_TABLE_ALIGNMENT, WD_CELL_VERTICAL_ALIGNMENT
@@ -102,4 +102,4 @@ class InvoiceGenerator:
         sig.paragraph_format.space_before = Pt(4)
         sig.paragraph_format.space_after = Pt(0)
         sig.add_run("(Dr. Kakasaheb Dole)\nSuperintendent of Police\nCentre for Police Research, Pune")
-        doc.save(output_path) generator
+        doc.save(output_path)
