@@ -24,6 +24,11 @@ course_options = [
     "Cyber Crime Investigation",
     "Bharosa Cell",
     "ATS",
+    "Woman Safety",
+    "Gender Sensitization & Forensic Training Programme for Police Personnel",
+    "Training of Trainers",
+    "EOW and Cyber Crime",
+    "Preparatory Course on Cyber Crime",
 ]
 course_name = st.selectbox("Course Name", course_options)
 col1, col2 = st.columns(2)
