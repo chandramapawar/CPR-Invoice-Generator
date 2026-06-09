@@ -13,7 +13,19 @@ st.write("Upload an Excel file, enter invoice details, and download the generate
 
 uploaded_file = st.file_uploader("Upload Excel file", type=["xlsx", "xls"])
 invoice_no = st.text_input("Invoice Number")
-course_title = st.text_input("Course Title")
+course_options = [
+    "Preparatory Cyber Crime",
+    "Eow & Cyber Crime",
+    "Use of AI",
+    "Women Safety",
+    "SC/ST Act",
+    "UAPA Act",
+    "Crime Against Women",
+    "Cyber Crime Investigation",
+    "Bharosa Cell",
+    "ATS",
+]
+course_name = st.selectbox("Course Name", course_options)
 col1, col2 = st.columns(2)
 with col1:
     training_from = st.date_input("Training From Date", value=date.today())
