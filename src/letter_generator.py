@@ -1,7 +1,9 @@
 from docx import Document
 from docx.shared import Pt, Cm
-from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_TAB_ALIGNMENT, WD_TAB_LEADER
+from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_TABLE_ALIGNMENT, WD_CELL_VERTICAL_ALIGNMENT
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
 
 class LetterGenerator:
     def fmt_money(self, x):
@@ -45,6 +47,7 @@ class LetterGenerator:
 
     def _set_font(self, run, name="Mangal", size=12, bold=False, underline=False):
         run.font.name = name
+        run._element.rPr.rFonts.set(qn("w:eastAsia"), name)
         run.font.size = Pt(size)
         run.bold = bold
         run.underline = underline
@@ -52,6 +55,7 @@ class LetterGenerator:
     def _set_normal_style(self, doc):
         style = doc.styles["Normal"]
         style.font.name = "Mangal"
+        style._element.rPr.rFonts.set(qn("w:eastAsia"), "Mangal")
         style.font.size = Pt(12)
 
     def _center_para(self, doc, text, size=12, bold=False, underline=False):
@@ -73,11 +77,26 @@ class LetterGenerator:
         self._set_font(r, name=name, size=size, bold=bold)
         cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
 
+    def _remove_table_borders(self, table):
+        tbl = table._tbl
+        tblPr = tbl.tblPr
+        tblBorders = tblPr.first_child_found_in("w:tblBorders")
+        if tblBorders is None:
+            tblBorders = OxmlElement("w:tblBorders")
+            tblPr.append(tblBorders)
+        for edge in ("top", "left", "bottom", "right", "insideH", "insideV"):
+            element = tblBorders.find(qn(f"w:{edge}"))
+            if element is None:
+                element = OxmlElement(f"w:{edge}")
+                tblBorders.append(element)
+            element.set(qn("w:val"), "nil")
+
     def generate_letter(self, records, output_path, reference_no, letter_date):
         first = records[0]
         unit_name = self._marathi_unit(getattr(first, "police_unit", "") or "")
         doc = Document()
         self._set_normal_style(doc)
+
         sec = doc.sections[0]
         sec.top_margin = Cm(1.0)
         sec.bottom_margin = Cm(1.0)
@@ -89,16 +108,19 @@ class LetterGenerator:
         self._center_para(doc, "TEL NO- 020-25653696 FAX NO- 020-25653696", size=10)
         self._center_para(doc, "E-MAIL- directorcprpune@gmail.com WEBSITE- www.cprpune.org", size=10)
 
-        hdr = doc.add_paragraph()
-        hdr.paragraph_format.space_before = Pt(0)
-        hdr.paragraph_format.space_after = Pt(0)
-        hdr_format = hdr.paragraph_format
-        hdr_format.tab_stops.add_tab_stop(Cm(15.5), WD_TAB_ALIGNMENT.RIGHT, WD_TAB_LEADER.SPACES)
-        hdr.add_run("जा.क्र.सी.पी.आर./प्रलंबित प्रशिक्षण शुल्क/          /२०२६")
-        hdr.add_run("\t")
-        hdr.add_run(f"पुणे दि. {letter_date.strftime('%d/%m/%Y')}")
+        hdr = doc.add_table(rows=1, cols=2)
+        hdr.alignment = WD_TABLE_ALIGNMENT.CENTER
+        hdr.autofit = False
+        hdr.columns[0].width = Cm(11.5)
+        hdr.columns[1].width = Cm(5.5)
+        self._remove_table_borders(hdr)
+        self._set_cell(hdr.cell(0, 0), "जा.क्र.सी.पी.आर./प्रलंबित प्रशिक्षण शुल्क/         /२०२६", size=11, bold=False, align=WD_ALIGN_PARAGRAPH.LEFT)
+        self._set_cell(hdr.cell(0, 1), f"पुणे दि. {letter_date.strftime('%d/%m/%Y')}", size=11, bold=False, align=WD_ALIGN_PARAGRAPH.RIGHT)
 
-        doc.add_paragraph("प्रति,")
+        p = doc.add_paragraph()
+        p.paragraph_format.space_before = Pt(0)
+        p.paragraph_format.space_after = Pt(0)
+        p.add_run("प्रति,")
         doc.add_paragraph("मा. पोलीस अधिक्षक,")
         unit_p = doc.add_paragraph()
         unit_p.paragraph_format.space_before = Pt(0)
@@ -114,6 +136,7 @@ class LetterGenerator:
         self._set_font(r2)
 
         doc.add_paragraph("महोदय,")
+
         body = doc.add_paragraph()
         body.paragraph_format.space_after = Pt(0)
         body.add_run("उपरोक्त विषय व संदर्भान्वये अनुसरून पोलीस संशोधन केंद्र, पुणे येथे मा. पोलीस महासंचालक, महाराष्ट्र राज्य, मुंबई यांच्या निर्देशानुसार महाराष्ट्र पोलीस दलातील पोलीस अधीक्षक ते पोलीस उप निरीक्षक दर्जाचे अधिकारी यांचे करीता नियमित सीपीआर येथे वेगवेगळ्या विषयांवर पोलीस सेवेमधील अधिका-यांसाठी प्रशिक्षण आयोजित होत असतात. आपल्या घटकातील अधिका-यांनी आर्थिक वर्ष २०२६-२०२७ मधील खालील तक्त्यातील विषयांवर प्रशिक्षण घेतलेले असून त्यांचे प्रशिक्षण रक्कम येणे बाकी आहे.")
@@ -124,6 +147,7 @@ class LetterGenerator:
         headers = ["अ.क्र", "प्रशिक्षणाचे नाव व सत्र", "प्रशिक्षणाचा कालावधी", "प्रशिक्षणार्थींचे नाव", "प्रशिक्षण रक्कम", "इनव्हॉइस नंबर"]
         for i, h in enumerate(headers):
             self._set_cell(table.rows[0].cells[i], h, size=10, bold=True)
+
         for i, r in enumerate(records, 1):
             row = table.add_row().cells
             self._set_cell(row[0], str(i), size=10)
@@ -150,16 +174,30 @@ class LetterGenerator:
         bank.alignment = WD_TABLE_ALIGNMENT.CENTER
         self._set_cell(bank.rows[0].cells[0], "Field", size=10, bold=True)
         self._set_cell(bank.rows[0].cells[1], "Value", size=10, bold=True)
-        bank_rows = [("1", "Name", "CPR, Pune"), ("2", "Account No", "10023971530"), ("3", "Type of Account", "Saving Bank Account"), ("4", "Bank Name", "State Bank of India"), ("5", "Bank Address", "NCL Branch, Pashan Road, Pune 411008."), ("6", "Bank Branch Code", "3552"), ("7", "MICR Code", "411002012"), ("8", "IFSC Code", "SBIN0003552"), ("9", "Mobile No.", "9960631393"), ("10", "Payee Code", "22010023828")]
+        bank_rows = [
+            ("1", "Name", "CPR, Pune"),
+            ("2", "Account No", "10023971530"),
+            ("3", "Type of Account", "Saving Bank Account"),
+            ("4", "Bank Name", "State Bank of India"),
+            ("5", "Bank Address", "NCL Branch, Pashan Road, Pune 411008."),
+            ("6", "Bank Branch Code", "3552"),
+            ("7", "MICR Code", "411002012"),
+            ("8", "IFSC Code", "SBIN0003552"),
+            ("9", "Mobile No.", "9960631393"),
+            ("10", "Payee Code", "22010023828"),
+        ]
         for no, field, val in bank_rows:
             row = bank.add_row().cells
             self._set_cell(row[0], f"{no} {field}", size=10, align=WD_ALIGN_PARAGRAPH.LEFT)
             self._set_cell(row[1], val, size=10, align=WD_ALIGN_PARAGRAPH.LEFT)
 
         doc.add_paragraph("वरील प्रमाणे थकबाकी प्रशिक्षण शुल्क तत्काळ अदा करण्याची विनंती आहे.")
+
         sig = doc.add_paragraph()
         sig.paragraph_format.space_before = Pt(4)
         sig.paragraph_format.space_after = Pt(0)
         sig.alignment = WD_ALIGN_PARAGRAPH.RIGHT
         sig.add_run("(डॉ. काकासाहेब डोळे)\nपोलीस अधीक्षक,\nपोलीस संशोधन केंद्र पुणे")
+
         doc.save(output_path)
+        return output_path
