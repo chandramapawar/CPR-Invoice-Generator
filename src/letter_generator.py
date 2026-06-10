@@ -55,7 +55,8 @@ class LetterGenerator:
         doc.add_paragraph(f"जा.क्र.सी.पी.आर./प्रलंबित प्रशिक्षण शुल्क/{reference_no}/२०२६ पुणे दि. {letter_date.strftime('%d/%m/%Y')}")
         doc.add_paragraph("प्रति,")
         doc.add_paragraph("मा. पोलीस अधिक्षक,")
-        doc.add_paragraph(first.police_unit or "")
+        unit_name = getattr(first, "police_unit_marathi", None) or getattr(first, "police_unit", "") or ""
+        doc.add_paragraph(unit_name)
 
         p = doc.add_paragraph()
         p.paragraph_format.space_after = Pt(0)
