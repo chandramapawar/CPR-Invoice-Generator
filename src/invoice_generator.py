@@ -55,12 +55,14 @@ class InvoiceGenerator:
         inv_p = doc.add_paragraph()
         inv_p.paragraph_format.space_before = Pt(0)
         inv_p.paragraph_format.space_after = Pt(0)
-        inv_p.add_run(f"Invoice No: {invoice_no}    Date: {invoice_date.strftime('%d-%m-%Y')}")
+        inv_p.add_run(f"Invoice No: {invoice_no}")
+        inv_p.add_run("\t")
+        inv_p.add_run(f"Date: {invoice_date.strftime('%d-%m-%Y')}")
 
         ref_p = doc.add_paragraph()
         ref_p.paragraph_format.space_before = Pt(0)
         ref_p.paragraph_format.space_after = Pt(0)
-        ref_p.add_run(f"Reference: {invoice_no}")
+        ref_p.add_run(f"Reference: OW/CPR/{(first.police_unit or 'UNIT').strip()}/__________/2026")
 
         doc.add_paragraph(f"To,\nSuperintendent of Police,\n{first.police_unit}")
         doc.add_paragraph("Training Details")
