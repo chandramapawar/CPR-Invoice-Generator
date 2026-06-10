@@ -4,41 +4,8 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_TABLE_ALIGNMENT, WD_CELL_VERTICAL_ALIGNMENT
 
 class InvoiceGenerator:
-    def _marathi_unit(self, name):
-        m = {
-            "Amravati City": "अमरावती शहर",
-            "Amravati": "अमरावती",
-            "Aurangabad": "छत्रपती संभाजीनगर",
-            "Chhatrapati Sambhajinagar": "छत्रपती संभाजीनगर",
-            "Chhatrapati Sambhajinagar City": "छत्रपती संभाजीनगर शहर",
-            "Dhule": "धुळे",
-            "Gadchiroli": "गडचिरोली",
-            "Hingoli": "हिंगोली",
-            "Jalgaon": "जळगाव",
-            "Kolhapur": "कोल्हापूर",
-            "Latur": "लातूर",
-            "Nagpur": "नागपूर",
-            "Nagpur City": "नागपूर शहर",
-            "Nanded": "नांदेड",
-            "Nashik": "नाशिक",
-            "Navi Mumbai": "नवी मुंबई",
-            "Palghar": "पालघर",
-            "Parbhani": "परभणी",
-            "Pune": "पुणे",
-            "Pune City": "पुणे शहर",
-            "Raigad": "रायगड",
-            "Ratnagiri": "रत्नागिरी",
-            "Sangli": "सांगली",
-            "Satara": "सातारा",
-            "Sindhudurg": "सिंधुदुर्ग",
-            "Solapur": "सोलापूर",
-            "Thane": "ठाणे",
-            "Wardha": "वर्धा",
-            "Washim": "वाशीम",
-            "Yavatmal": "यवतमाळ",
-        }
-        n = (name or "").strip()
-        return m.get(n, n)
+    def fmt_money(self, x):
+        return f"{int(x):,}" if float(x).is_integer() else f"{x:,.2f}"
 
     def _set_font(self, run, name="Calibri", size=11, bold=False, underline=False):
         run.font.name = name
@@ -74,7 +41,6 @@ class InvoiceGenerator:
 
     def generate_invoice(self, records, output_path, invoice_no, invoice_date):
         first = records[0]
-        unit_name = self._marathi_unit(getattr(first, "police_unit", "") or "")
         total = sum(r.total_fee for r in records)
         doc = Document()
         sec = doc.sections[0]
@@ -97,12 +63,8 @@ class InvoiceGenerator:
         inv_p.add_run(" " * 25)
         inv_p.add_run(f"Date: {invoice_date.strftime('%d-%m-%Y')}")
 
-        ref_p = doc.add_paragraph()
-        ref_p.paragraph_format.space_before = Pt(0)
-        ref_p.paragraph_format.space_after = Pt(0)
-        ref_p.add_run(f"Reference: OW/CPR/{unit_name}/__________/2026")
-
-        doc.add_paragraph(f"To,\nSuperintendent of Police,\n{unit_name}")
+        doc.add_paragraph(f"Reference: {first.reference_no or invoice_no}")
+        doc.add_paragraph(f"To,\nSuperintendent of Police,\n{first.police_unit}")
         doc.add_paragraph("Training Details")
 
         table = doc.add_table(rows=1, cols=9)
@@ -121,18 +83,23 @@ class InvoiceGenerator:
             self._set_cell(row[4], r.officer_name, size=10)
             self._set_cell(row[5], r.rank, size=10)
             self._set_cell(row[6], str(r.duration_days), size=10)
-            self._set_cell(row[7], f"{int(r.fee_per_day):,}" if float(r.fee_per_day).is_integer() else f"{r.fee_per_day:,.2f}", size=10)
-            self._set_cell(row[8], f"{int(r.total_fee):,}" if float(r.total_fee).is_integer() else f"{r.total_fee:,.2f}", size=10)
+            self._set_cell(row[7], self.fmt_money(r.fee_per_day), size=10)
+            self._set_cell(row[8], self.fmt_money(r.total_fee), size=10)
 
         gp = doc.add_paragraph()
         gp.paragraph_format.space_before = Pt(4)
         gp.paragraph_format.space_after = Pt(0)
-        g = gp.add_run(f"Grand Total: ₹{int(total):,}" if float(total).is_integer() else f"Grand Total: ₹{total:,.2f}")
+        g = gp.add_run(f"Grand Total: ₹{self.fmt_money(total)}")
         self._set_font(g, bold=True)
 
         doc.add_paragraph(f"Amount: {self.amount_in_words(int(total))} Rupees Only")
-
         doc.add_paragraph("Bank Account Details")
+
+        bank = doc.add_table(rows=1, cols=2)
+        bank.style = "Table Grid"
+        bank.alignment = WD_TABLE_ALIGNMENT.CENTER
+        self._set_cell(bank.rows[0].cells[0], "Field", size=10, bold=True)
+        self._set_cell(bank.rows[0].cells[1], "Value", size=10, bold=True)
         bank_rows = [
             ("Account Name", "CPR, Pune"),
             ("Account Number", "10023971530"),
@@ -144,22 +111,14 @@ class InvoiceGenerator:
             ("IFSC Code", "SBIN0003552"),
             ("Payee Code", "22010023828"),
         ]
-        for label, value in bank_rows:
-            bp = doc.add_paragraph()
-            bp.paragraph_format.space_before = Pt(0)
-            bp.paragraph_format.space_after = Pt(0)
-            run1 = bp.add_run(f"{label}: ")
-            self._set_font(run1, bold=True)
-            run2 = bp.add_run(value)
-            self._set_font(run2)
-
-        doc.add_paragraph("तरी सदर थकीत प्रशिक्षण फी रक्कम पोलीस संशोधन केंद्र पुणे येथे तातडीने पाठविण्याची विनंती आहे.")
-        doc.add_paragraph("सांवत:- वर नमुद इन व्हॉईस नंबर प्रमाणे प्रशिक्षण फी Demand Note/Invoice जोडलेले आहे.")
+        for field, val in bank_rows:
+            row = bank.add_row().cells
+            self._set_cell(row[0], field, size=10, align=WD_ALIGN_PARAGRAPH.RIGHT)
+            self._set_cell(row[1], val, size=10, align=WD_ALIGN_PARAGRAPH.RIGHT)
 
         sig = doc.add_paragraph()
         sig.paragraph_format.space_before = Pt(4)
         sig.paragraph_format.space_after = Pt(0)
-        sig.alignment = WD_ALIGN_PARAGRAPH.RIGHT
         sig.add_run("(Dr. Kakasaheb Dole)\nSuperintendent of Police\nCentre for Police Research, Pune")
-
         doc.save(output_path)
+        
