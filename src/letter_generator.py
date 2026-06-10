@@ -66,17 +66,20 @@ class LetterGenerator:
         self._center_para(doc, "TEL NO- 020-25653696 FAX NO- 020-25653696", size=10)
         self._center_para(doc, "E-MAIL- directorcprpune@gmail.com WEBSITE- www.cprpune.org", size=10)
 
-        top = doc.add_paragraph()
-        top.paragraph_format.space_before = Pt(0)
-        top.paragraph_format.space_after = Pt(0)
-        top.add_run(f"जा.क्र.सी.पी.आर./प्रलंबित प्रशिक्षण शुल्क/{reference_no}/२०२६")
-        top.alignment = WD_ALIGN_PARAGRAPH.LEFT
-
-        dpara = doc.add_paragraph()
-        dpara.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-        dpara.paragraph_format.space_before = Pt(0)
-        dpara.paragraph_format.space_after = Pt(0)
-        dpara.add_run(f"पुणे दि. {letter_date.strftime('%d/%m/%Y')}")
+        hdr = doc.add_table(rows=1, cols=2)
+        hdr.alignment = WD_TABLE_ALIGNMENT.CENTER
+        hdr.rows[0].cells[0].text = ""
+        hdr.rows[0].cells[1].text = ""
+        lp = hdr.rows[0].cells[0].paragraphs[0]
+        lp.paragraph_format.space_before = Pt(0)
+        lp.paragraph_format.space_after = Pt(0)
+        lp.alignment = WD_ALIGN_PARAGRAPH.LEFT
+        lp.add_run("जा.क्र.सी.पी.आर./प्रलंबित प्रशिक्षण शुल्क/          /२०२६")
+        rp = hdr.rows[0].cells[1].paragraphs[0]
+        rp.paragraph_format.space_before = Pt(0)
+        rp.paragraph_format.space_after = Pt(0)
+        rp.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        rp.add_run(f"पुणे दि. {letter_date.strftime('%d/%m/%Y')}")
 
         doc.add_paragraph("प्रति,")
         doc.add_paragraph("मा. पोलीस अधिक्षक,")
