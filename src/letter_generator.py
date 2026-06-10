@@ -4,6 +4,9 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_TABLE_ALIGNMENT, WD_CELL_VERTICAL_ALIGNMENT
 
 class LetterGenerator:
+    def fmt_money(self, x):
+        return f"{int(x):,}" if float(x).is_integer() else f"{x:,.2f}"
+
     def _set_font(self, run, name="Mangal", size=12, bold=False, underline=False):
         run.font.name = name
         run.font.size = Pt(size)
@@ -49,12 +52,7 @@ class LetterGenerator:
         self._center_para(doc, "TEL NO- 020-25653696 FAX NO- 020-25653696", size=10)
         self._center_para(doc, "E-MAIL- directorcprpune@gmail.com WEBSITE- www.cprpune.org", size=10)
 
-        date_ref = doc.add_table(rows=1, cols=2)
-        date_ref.alignment = WD_TABLE_ALIGNMENT.CENTER
-        date_ref.style = "Table Grid"
-        self._set_cell(date_ref.rows[0].cells[0], f"पुणे दि. {letter_date.strftime('%d/%m/%Y')}", size=10, align=WD_ALIGN_PARAGRAPH.LEFT)
-        self._set_cell(date_ref.rows[0].cells[1], f"जा.क्र.सी.पी.आर./प्रलंबित प्रशिक्षण शुल्क/{reference_no}", size=10, align=WD_ALIGN_PARAGRAPH.RIGHT)
-
+        doc.add_paragraph(f"जा.क्र.सी.पी.आर./प्रलंबित प्रशिक्षण शुल्क/{reference_no}/२०२६ पुणे दि. {letter_date.strftime('%d/%m/%Y')}")
         doc.add_paragraph("प्रति,")
         doc.add_paragraph("मा. पोलीस अधिक्षक,")
         doc.add_paragraph(first.police_unit or "")
@@ -83,7 +81,7 @@ class LetterGenerator:
             self._set_cell(row[1], f"{r.course_name} {r.batch_session}".strip(), size=10)
             self._set_cell(row[2], f"{r.from_date.strftime('%d/%m/%Y') if r.from_date else ''} To {r.to_date.strftime('%d/%m/%Y') if r.to_date else ''}", size=10)
             self._set_cell(row[3], r.officer_name, size=10)
-            self._set_cell(row[4], f"{int(r.total_fee):,}" if float(r.total_fee).is_integer() else f"{r.total_fee:,.2f}", size=10)
+            self._set_cell(row[4], self.fmt_money(r.total_fee), size=10)
             self._set_cell(row[5], reference_no, size=10)
 
         total = sum(r.total_fee for r in records)
@@ -92,7 +90,7 @@ class LetterGenerator:
         tp.paragraph_format.space_after = Pt(0)
         tr = tp.add_run("एकूण")
         self._set_font(tr, bold=True)
-        tr2 = tp.add_run(f" {int(total):,}/-" if float(total).is_integer() else f" {total:,.2f}/-")
+        tr2 = tp.add_run(f" {self.fmt_money(total)}/-")
         self._set_font(tr2, bold=True)
 
         doc.add_paragraph("सदर प्रशिक्षणासाठी आपले घटकाकडून वरील प्रमाणे थकबाकी रक्कम अद्याप पोलीस संशोधन केंद्र पुणे या कार्यालयास प्राप्त झालेली नाही.")
