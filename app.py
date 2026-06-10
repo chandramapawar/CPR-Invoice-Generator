@@ -30,7 +30,7 @@ course_options = [
     "EOW and Cyber Crime",
     "Preparatory Course on Cyber Crime",
 ]
-course_name = st.selectbox("Course Name", course_options)
+course_title = st.selectbox("Course Name", course_options)
 col1, col2 = st.columns(2)
 with col1:
     training_from = st.date_input("Training From Date", value=date.today())
@@ -50,8 +50,8 @@ if st.button("Generate Documents", type="primary"):
         st.error("Please upload an Excel file first.")
     elif not invoice_no.strip():
         st.error("Please enter an invoice number.")
-    elif not course_title.strip():
-        st.error("Please enter a course title.")
+    elif not (course_title and course_title.strip()):
+    st.error("Please select a course title.")
     else:
         try:
             output_dir = Path("generated_output")
