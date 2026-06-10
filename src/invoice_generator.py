@@ -53,11 +53,12 @@ class InvoiceGenerator:
         self._center_para(doc, "Demand Note/Invoice", size=13, bold=True)
 
         inv_p = doc.add_paragraph()
-        inv_p.paragraph_format.space_before = Pt(0)
-        inv_p.paragraph_format.space_after = Pt(0)
-        inv_p.add_run(f"Invoice No: {invoice_no}")
-        inv_p.add_run("\t")
-        inv_p.add_run(f"Date: {invoice_date.strftime('%d-%m-%Y')}")
+inv_p.paragraph_format.space_before = Pt(0)
+inv_p.paragraph_format.space_after = Pt(0)
+inv_p.paragraph_format.tab_stops.add_tab_stop(Cm(16), WD_TAB_ALIGNMENT.RIGHT, WD_TAB_LEADER.SPACES)
+inv_p.add_run(f"Invoice No: {invoice_no}")
+inv_p.add_run("\t")
+inv_p.add_run(f"Date: {invoice_date.strftime('%d-%m-%Y')}")
 
         ref_p = doc.add_paragraph()
         ref_p.paragraph_format.space_before = Pt(0)
