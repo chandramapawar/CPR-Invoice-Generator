@@ -60,7 +60,7 @@ class InvoiceGenerator:
         ref_p = doc.add_paragraph()
         ref_p.paragraph_format.space_before = Pt(0)
         ref_p.paragraph_format.space_after = Pt(0)
-        ref_p.add_run(f"Reference: {first.reference_no or invoice_no}")
+        ref_p.add_run(f"Reference: {invoice_no}")
 
         doc.add_paragraph(f"To,\nSuperintendent of Police,\n{first.police_unit}")
         doc.add_paragraph("Training Details")
