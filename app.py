@@ -15,7 +15,6 @@ uploaded_file = st.file_uploader("Upload Excel file", type=["xlsx", "xls"])
 invoice_no = st.text_input("Invoice Number")
 
 course_options = [
-    "Preparatory Cyber Crime",
     "Eow & Cyber Crime",
     "Use of AI",
     "Women Safety",
