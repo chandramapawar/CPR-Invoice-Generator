@@ -7,6 +7,19 @@ class LetterGenerator:
     def fmt_money(self, x):
         return f"{int(x):,}" if float(x).is_integer() else f"{x:,.2f}"
 
+    def _marathi_unit(self, name):
+        m = {
+            "Amravati City": "अमरावती शहर",
+            "Hingoli": "हिंगोली",
+            "Ahilyanagar": "अहिल्यानगर",
+            "Nanded": "नांदेड",
+            "Pune City": "पुणे शहर",
+            "Nagpur City": "नागपूर शहर",
+            "Chhatrapati Sambhajinagar": "छत्रपती संभाजीनगर",
+        }
+        n = (name or "").strip()
+        return m.get(n, n)
+
     def _set_font(self, run, name="Mangal", size=12, bold=False, underline=False):
         run.font.name = name
         run.font.size = Pt(size)
@@ -39,6 +52,7 @@ class LetterGenerator:
 
     def generate_letter(self, records, output_path, reference_no, letter_date):
         first = records[0]
+        unit_name = self._marathi_unit(getattr(first, "police_unit_marathi", None) or getattr(first, "police_unit", "") or "")
         doc = Document()
         self._set_normal_style(doc)
         sec = doc.sections[0]
@@ -52,13 +66,27 @@ class LetterGenerator:
         self._center_para(doc, "TEL NO- 020-25653696 FAX NO- 020-25653696", size=10)
         self._center_para(doc, "E-MAIL- directorcprpune@gmail.com WEBSITE- www.cprpune.org", size=10)
 
-        doc.add_paragraph(f"जा.क्र.सी.पी.आर./प्रलंबित प्रशिक्षण शुल्क/{reference_no}/२०२६ पुणे दि. {letter_date.strftime('%d/%m/%Y')}")
+        top = doc.add_paragraph()
+        top.paragraph_format.space_before = Pt(0)
+        top.paragraph_format.space_after = Pt(0)
+        top.add_run(f"जा.क्र.सी.पी.आर./प्रलंबित प्रशिक्षण शुल्क/{reference_no}/२०२६")
+        top.alignment = WD_ALIGN_PARAGRAPH.LEFT
+
+        dpara = doc.add_paragraph()
+        dpara.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        dpara.paragraph_format.space_before = Pt(0)
+        dpara.paragraph_format.space_after = Pt(0)
+        dpara.add_run(f"पुणे दि. {letter_date.strftime('%d/%m/%Y')}")
+
         doc.add_paragraph("प्रति,")
         doc.add_paragraph("मा. पोलीस अधिक्षक,")
-        unit_name = getattr(first, "police_unit_marathi", None) or getattr(first, "police_unit", "") or ""
-        doc.add_paragraph(unit_name)
+        unit_p = doc.add_paragraph()
+        unit_p.paragraph_format.space_before = Pt(0)
+        unit_p.paragraph_format.space_after = Pt(0)
+        unit_p.add_run(unit_name)
 
         p = doc.add_paragraph()
+        p.paragraph_format.space_before = Pt(0)
         p.paragraph_format.space_after = Pt(0)
         r1 = p.add_run("विषय")
         self._set_font(r1, bold=True, underline=True)
@@ -80,7 +108,7 @@ class LetterGenerator:
             row = table.add_row().cells
             self._set_cell(row[0], str(i), size=10)
             self._set_cell(row[1], f"{r.course_name} {r.batch_session}".strip(), size=10)
-            self._set_cell(row[2], f"{r.from_date.strftime('%d/%m/%Y') if r.from_date else ''} To {r.to_date.strftime('%d/%m/%Y') if r.to_date else ''}", size=10)
+            self._set_cell(row[2], f"{r.from_date.strftime('%d/%m/%Y') if r.from_date else ''} ते {r.to_date.strftime('%d/%m/%Y') if r.to_date else ''}", size=10)
             self._set_cell(row[3], r.officer_name, size=10)
             self._set_cell(row[4], self.fmt_money(r.total_fee), size=10)
             self._set_cell(row[5], reference_no, size=10)
@@ -108,10 +136,10 @@ class LetterGenerator:
             self._set_cell(row[0], f"{no} {field}", size=10, align=WD_ALIGN_PARAGRAPH.LEFT)
             self._set_cell(row[1], val, size=10, align=WD_ALIGN_PARAGRAPH.LEFT)
 
-        doc.add_paragraph("तरी सदर थकीत प्रशिक्षण फी रक्कम पोलीस संशोधन केंद्र पुणे येथे तातडीने पाठविण्याची विनंती आहे.")
-        doc.add_paragraph("सांवत:- वर नमुद इन व्हॉईस नंबर प्रमाणे प्रशिक्षण फी Demand Note/Invoice जोडलेले आहे.")
+        doc.add_paragraph("वरील प्रमाणे थकबाकी प्रशिक्षण शुल्क तत्काळ अदा करण्याची विनंती आहे.")
         sig = doc.add_paragraph()
         sig.paragraph_format.space_before = Pt(4)
         sig.paragraph_format.space_after = Pt(0)
+        sig.alignment = WD_ALIGN_PARAGRAPH.RIGHT
         sig.add_run("(डॉ. काकासाहेब डोळे)\nपोलीस अधीक्षक,\nपोलीस संशोधन केंद्र पुणे")
         doc.save(output_path)
