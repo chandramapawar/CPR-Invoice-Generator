@@ -10,12 +10,16 @@ class LetterGenerator:
     def _marathi_unit(self, name):
         m = {
             "Amravati City": "अमरावती शहर",
+            "Amravati": "अमरावती",
             "Hingoli": "हिंगोली",
             "Ahilyanagar": "अहिल्यानगर",
             "Nanded": "नांदेड",
             "Pune City": "पुणे शहर",
+            "Pune": "पुणे",
             "Nagpur City": "नागपूर शहर",
+            "Nagpur": "नागपूर",
             "Chhatrapati Sambhajinagar": "छत्रपती संभाजीनगर",
+            "Chhatrapati Sambhajinagar City": "छत्रपती संभाजीनगर शहर",
         }
         n = (name or "").strip()
         return m.get(n, n)
