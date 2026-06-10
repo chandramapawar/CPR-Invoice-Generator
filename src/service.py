@@ -1,4 +1,3 @@
-#service
 from collections import defaultdict
 from pathlib import Path
 
@@ -33,12 +32,12 @@ class GenerationService:
                 r.to_date = training_to
             if not r.duration_days and r.from_date and r.to_date:
                 r.duration_days = (r.to_date - r.from_date).days + 1
-            r.total_fee = r.duration_days * r.fee_per_day
+            r.fee_per_day = 2000
+            r.total_fee = r.duration_days * 2000
 
         grouped_records = self.group_records_by_unit(records)
         generated_files = []
         for police_unit, unit_records in grouped_records.items():
-            first = unit_records[0]
             reference_no = f"OW/CPR/{(police_unit or 'UNIT').strip()}/__________/2026"
             letter_path = self.document_manager.get_letter_path(police_unit, reference_no)
             invoice_path = self.document_manager.get_invoice_path(police_unit, invoice_no)
