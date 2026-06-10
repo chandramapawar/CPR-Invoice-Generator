@@ -1,6 +1,6 @@
 from docx import Document
 from docx.shared import Pt, Cm
-from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_TAB_ALIGNMENT, WD_TAB_LEADER
 from docx.enum.table import WD_TABLE_ALIGNMENT, WD_CELL_VERTICAL_ALIGNMENT
 
 class LetterGenerator:
@@ -11,15 +11,34 @@ class LetterGenerator:
         m = {
             "Amravati City": "अमरावती शहर",
             "Amravati": "अमरावती",
-            "Hingoli": "हिंगोली",
-            "Ahilyanagar": "अहिल्यानगर",
-            "Nanded": "नांदेड",
-            "Pune City": "पुणे शहर",
-            "Pune": "पुणे",
-            "Nagpur City": "नागपूर शहर",
-            "Nagpur": "नागपूर",
+            "Aurangabad": "छत्रपती संभाजीनगर",
             "Chhatrapati Sambhajinagar": "छत्रपती संभाजीनगर",
             "Chhatrapati Sambhajinagar City": "छत्रपती संभाजीनगर शहर",
+            "Dhule": "धुळे",
+            "Gadchiroli": "गडचिरोली",
+            "Hingoli": "हिंगोली",
+            "Jalgaon": "जळगाव",
+            "Kolhapur": "कोल्हापूर",
+            "Latur": "लातूर",
+            "Nagpur": "नागपूर",
+            "Nagpur City": "नागपूर शहर",
+            "Nanded": "नांदेड",
+            "Nashik": "नाशिक",
+            "Navi Mumbai": "नवी मुंबई",
+            "Palghar": "पालघर",
+            "Parbhani": "परभणी",
+            "Pune": "पुणे",
+            "Pune City": "पुणे शहर",
+            "Raigad": "रायगड",
+            "Ratnagiri": "रत्नागिरी",
+            "Sangli": "सांगली",
+            "Satara": "सातारा",
+            "Sindhudurg": "सिंधुदुर्ग",
+            "Solapur": "सोलापूर",
+            "Thane": "ठाणे",
+            "Wardha": "वर्धा",
+            "Washim": "वाशीम",
+            "Yavatmal": "यवतमाळ",
         }
         n = (name or "").strip()
         return m.get(n, n)
@@ -70,20 +89,14 @@ class LetterGenerator:
         self._center_para(doc, "TEL NO- 020-25653696 FAX NO- 020-25653696", size=10)
         self._center_para(doc, "E-MAIL- directorcprpune@gmail.com WEBSITE- www.cprpune.org", size=10)
 
-        hdr = doc.add_table(rows=1, cols=2)
-        hdr.alignment = WD_TABLE_ALIGNMENT.CENTER
-        hdr.rows[0].cells[0].text = ""
-        hdr.rows[0].cells[1].text = ""
-        lp = hdr.rows[0].cells[0].paragraphs[0]
-        lp.paragraph_format.space_before = Pt(0)
-        lp.paragraph_format.space_after = Pt(0)
-        lp.alignment = WD_ALIGN_PARAGRAPH.LEFT
-        lp.add_run("जा.क्र.सी.पी.आर./प्रलंबित प्रशिक्षण शुल्क/          /२०२६")
-        rp = hdr.rows[0].cells[1].paragraphs[0]
-        rp.paragraph_format.space_before = Pt(0)
-        rp.paragraph_format.space_after = Pt(0)
-        rp.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-        rp.add_run(f"पुणे दि. {letter_date.strftime('%d/%m/%Y')}")
+        hdr = doc.add_paragraph()
+        hdr.paragraph_format.space_before = Pt(0)
+        hdr.paragraph_format.space_after = Pt(0)
+        hdr_format = hdr.paragraph_format
+        hdr_format.tab_stops.add_tab_stop(Cm(15.5), WD_TAB_ALIGNMENT.RIGHT, WD_TAB_LEADER.SPACES)
+        hdr.add_run("जा.क्र.सी.पी.आर./प्रलंबित प्रशिक्षण शुल्क/          /२०२६")
+        hdr.add_run("\t")
+        hdr.add_run(f"पुणे दि. {letter_date.strftime('%d/%m/%Y')}")
 
         doc.add_paragraph("प्रति,")
         doc.add_paragraph("मा. पोलीस अधिक्षक,")
