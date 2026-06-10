@@ -39,7 +39,7 @@ class GenerationService:
         generated_files = []
         for police_unit, unit_records in grouped_records.items():
             first = unit_records[0]
-            reference_no = first.reference_no or f"CPR-REF-{invoice_no}"
+            reference_no = f"OW/CPR/{(police_unit or 'UNIT').strip()}/__________/2026"
             letter_path = self.document_manager.get_letter_path(police_unit, reference_no)
             invoice_path = self.document_manager.get_invoice_path(police_unit, invoice_no)
             self.letter_generator.generate_letter(unit_records, letter_path, reference_no, letter_date)
