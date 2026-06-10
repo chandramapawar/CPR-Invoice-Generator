@@ -4,6 +4,42 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_TABLE_ALIGNMENT, WD_CELL_VERTICAL_ALIGNMENT
 
 class InvoiceGenerator:
+    def _marathi_unit(self, name):
+        m = {
+            "Amravati City": "अमरावती शहर",
+            "Amravati": "अमरावती",
+            "Aurangabad": "छत्रपती संभाजीनगर",
+            "Chhatrapati Sambhajinagar": "छत्रपती संभाजीनगर",
+            "Chhatrapati Sambhajinagar City": "छत्रपती संभाजीनगर शहर",
+            "Dhule": "धुळे",
+            "Gadchiroli": "गडचिरोली",
+            "Hingoli": "हिंगोली",
+            "Jalgaon": "जळगाव",
+            "Kolhapur": "कोल्हापूर",
+            "Latur": "लातूर",
+            "Nagpur": "नागपूर",
+            "Nagpur City": "नागपूर शहर",
+            "Nanded": "नांदेड",
+            "Nashik": "नाशिक",
+            "Navi Mumbai": "नवी मुंबई",
+            "Palghar": "पालघर",
+            "Parbhani": "परभणी",
+            "Pune": "पुणे",
+            "Pune City": "पुणे शहर",
+            "Raigad": "रायगड",
+            "Ratnagiri": "रत्नागिरी",
+            "Sangli": "सांगली",
+            "Satara": "सातारा",
+            "Sindhudurg": "सिंधुदुर्ग",
+            "Solapur": "सोलापूर",
+            "Thane": "ठाणे",
+            "Wardha": "वर्धा",
+            "Washim": "वाशीम",
+            "Yavatmal": "यवतमाळ",
+        }
+        n = (name or "").strip()
+        return m.get(n, n)
+
     def _set_font(self, run, name="Calibri", size=11, bold=False, underline=False):
         run.font.name = name
         run.font.size = Pt(size)
@@ -38,6 +74,7 @@ class InvoiceGenerator:
 
     def generate_invoice(self, records, output_path, invoice_no, invoice_date):
         first = records[0]
+        unit_name = self._marathi_unit(getattr(first, "police_unit", "") or "")
         total = sum(r.total_fee for r in records)
         doc = Document()
         sec = doc.sections[0]
@@ -52,20 +89,20 @@ class InvoiceGenerator:
         self._center_para(doc, "GST No. -- 27AAATC3424CIZB PAN - AAATC3424C", size=10)
         self._center_para(doc, "Demand Note/Invoice", size=13, bold=True)
 
-       inv_p = doc.add_paragraph()
-       inv_p.paragraph_format.space_before = Pt(0)
-       inv_p.paragraph_format.space_after = Pt(0)
-       inv_p.alignment = WD_ALIGN_PARAGRAPH.LEFT
-       inv_p.add_run(f"Invoice No: {invoice_no}")
-       inv_p.add_run(" " * 25)
-       inv_p.add_run(f"Date: {invoice_date.strftime('%d-%m-%Y')}")
+        inv_p = doc.add_paragraph()
+        inv_p.paragraph_format.space_before = Pt(0)
+        inv_p.paragraph_format.space_after = Pt(0)
+        inv_p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+        inv_p.add_run(f"Invoice No: {invoice_no}")
+        inv_p.add_run(" " * 25)
+        inv_p.add_run(f"Date: {invoice_date.strftime('%d-%m-%Y')}")
 
         ref_p = doc.add_paragraph()
         ref_p.paragraph_format.space_before = Pt(0)
         ref_p.paragraph_format.space_after = Pt(0)
-        ref_p.add_run(f"Reference: OW/CPR/{(first.police_unit or 'UNIT').strip()}/__________/2026")
+        ref_p.add_run(f"Reference: OW/CPR/{unit_name}/__________/2026")
 
-        doc.add_paragraph(f"To,\nSuperintendent of Police,\n{first.police_unit}")
+        doc.add_paragraph(f"To,\nSuperintendent of Police,\n{unit_name}")
         doc.add_paragraph("Training Details")
 
         table = doc.add_table(rows=1, cols=9)
