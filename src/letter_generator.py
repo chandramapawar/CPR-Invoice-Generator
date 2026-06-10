@@ -52,7 +52,7 @@ class LetterGenerator:
 
     def generate_letter(self, records, output_path, reference_no, letter_date):
         first = records[0]
-        unit_name = self._marathi_unit(getattr(first, "police_unit_marathi", None) or getattr(first, "police_unit", "") or "")
+        unit_name = self._marathi_unit(getattr(first, "police_unit", "") or "")
         doc = Document()
         self._set_normal_style(doc)
         sec = doc.sections[0]
