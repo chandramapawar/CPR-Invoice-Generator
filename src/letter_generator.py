@@ -114,8 +114,29 @@ class LetterGenerator:
         hdr.columns[0].width = Cm(11.5)
         hdr.columns[1].width = Cm(5.5)
         self._remove_table_borders(hdr)
-        self._set_cell(hdr.cell(0, 0), "जा.क्र.सी.पी.आर./प्रलंबित प्रशिक्षण शुल्क/         /२०२६", size=11, bold=False, align=WD_ALIGN_PARAGRAPH.LEFT)
-        self._set_cell(hdr.cell(0, 1), f"पुणे दि. {letter_date.strftime('%d/%m/%Y')}", size=11, bold=False, align=WD_ALIGN_PARAGRAPH.RIGHT)
+        self._set_cell(
+            hdr.cell(0, 0), 
+            "जा.क्र.सी.पी.आर./प्रलंबित प्रशिक्षण शुल्क/         /२०२६", 
+            size=11,
+            bold=False, 
+            align=WD_ALIGN_PARAGRAPH.LEFT
+        )
+
+        marathi_months = {
+            1: "जानेवारी", 2: "फेब्रुवारी", 3: "मार्च", 4: "एप्रिल",
+            5: "मे", 6: "जून", 7: "जुलै", 8: "ऑगस्ट",
+            9: "सप्टेंबर", 10: "ऑक्टोबर", 11: "नोव्हेंबर", 12: "डिसेंबर"
+        }
+        right_date = f"पुणे दि. {letter_date.day:02d} 
+        {marathi_months[letter_date.month]} 
+        {letter_date.year}"
+        self._set_cell(
+            hdr.cell(0, 1),
+              right_date, 
+              size=11, 
+              bold=False, 
+              align=WD_ALIGN_PARAGRAPH.RIGHT
+        )
 
         p = doc.add_paragraph()
         p.paragraph_format.space_before = Pt(0)
@@ -171,9 +192,10 @@ class LetterGenerator:
 
         bank = doc.add_table(rows=1, cols=2)
         bank.style = "Table Grid"
-        bank.alignment = WD_TABLE_ALIGNMENT.CENTER
-        self._set_cell(bank.rows[0].cells[0], "Field", size=10, bold=True)
-        self._set_cell(bank.rows[0].cells[1], "Value", size=10, bold=True)
+        bank.alignment = WD_TABLE_ALIGNMENT.LEFT
+        bank.autofit = False
+        self._set_cell(bank.rows[0].cells[0], "Field", size=10, bold=True, align=WD_ALIGN_PARAGRAPH.CENTER)
+        self._set_cell(bank.rows[0].cells[1], "Value", size=10, bold=True, align=WD_ALIGN_PARAGRAPH.CENTER)
         bank_rows = [
             ("1", "Name", "CPR, Pune"),
             ("2", "Account No", "10023971530"),
