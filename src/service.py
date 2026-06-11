@@ -30,9 +30,9 @@ class GenerationService:
                 r.from_date = training_from
             if training_to:
                 r.to_date = training_to
-            if not r.duration_days and r.from_date and r.to_date:
+            if r.from_date and r.to_date:
                 r.duration_days = (r.to_date - r.from_date).days + 1
-            r.total_fee = r.duration_days * r.fee_per_day
+                r.total_fee = r.duration_days * r.fee_per_day
 
         grouped_records = self.group_records_by_unit(records)
         generated_files = []
