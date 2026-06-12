@@ -5,16 +5,24 @@ from docx.enum.table import WD_TABLE_ALIGNMENT, WD_CELL_VERTICAL_ALIGNMENT
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 
+
 class LetterGenerator:
     def fmt_money(self, x):
         return f"{int(x):,}" if float(x).is_integer() else f"{x:,.2f}"
 
+    def fmt_money_marathi(self, x):
+        eng = self.fmt_money(x)
+        mapping = str.maketrans("0123456789", "०१२३४५६७८९")
+        return eng.translate(mapping)
+
     def _marathi_unit(self, name):
         m = {
+            # Core districts / cities
             "Amravati City": "अमरावती शहर",
             "Amravati": "अमरावती",
+            "Ahilyanagar":"अहिल्यानगर",
             "Aurangabad": "छत्रपती संभाजीनगर",
-            "Chhatrapati Sambhajinagar": "छत्रपती संभाजीनगर",
+            "Chhatrapati Sambhajinagar": "छत्रपतीसंभाजीनगर",
             "Chhatrapati Sambhajinagar City": "छत्रपती संभाजीनगर शहर",
             "Dhule": "धुळे",
             "Gadchiroli": "गडचिरोली",
@@ -26,7 +34,7 @@ class LetterGenerator:
             "Nagpur City": "नागपूर शहर",
             "Nanded": "नांदेड",
             "Nashik": "नाशिक",
-            "Navi Mumbai": "नवी मुंबई",
+            "Navi Mumbai": "नवीमुंबई",
             "Palghar": "पालघर",
             "Parbhani": "परभणी",
             "Pune": "पुणे",
@@ -41,6 +49,78 @@ class LetterGenerator:
             "Wardha": "वर्धा",
             "Washim": "वाशीम",
             "Yavatmal": "यवतमाळ",
+
+            # Commissionerates / metros
+            "Amaravati": "अमरावती",
+            "Brihan Mumbai": "बृहन्मुंबई",
+            "Chhatrapati Sambhaji Nagar": "छत्रपतीसंभाजीनगर",
+            "Mira-Bhayandar, Vasai-Virar": "मीरा-भाईंदर,वसई-विरार",
+            "Pimpri Chinchwad": "पिंपरीचिंचवड",
+            "Railways Mumbai": "रेल्वेमुंबई",
+
+            # Districts / Rural variants
+            "Ahmednagar": "अहमदनगर",
+            "Akola": "अकोला",
+            "Amaravati R": "अमरावतीग्रामीण",
+            "Beed": "बीड",
+            "Bhandara": "भंडारा",
+            "Buldhana": "बुलढाणा",
+            "Chandrapur": "चंद्रपूर",
+            "Chhatrapati Sambhaji Nagar Rural": "छत्रपतीसंभाजीनगरग्रामीण",
+            "Dharashiv": "धाराशिव",
+            "Gondia": "गोंदिया",
+            "Jalna": "जालना",
+            "Nagpur R": "नागपूरग्रामीण",
+            "Nandurbar": "नंदुरबार",
+            "Nashik R": "नाशिकग्रामीण",
+            "Pune R": "पुणेग्रामीण",
+            "Solapur R": "सोलापूरग्रामीण",
+            "Thane R": "ठाणेग्रामीण",
+            "Railways Nagpur": "रेल्वेनागपूर",
+            "Railways Pune": "रेल्वेपुणे",
+            "Railways Chhatrapati Sambhaji Nagar": "रेल्वेछत्रपतीसंभाजीनगर",
+
+            # PTCs
+            "PTC Dhule": "पोलीसप्रशिक्षणकेंद्रधुळे",
+            "PTC Jalna": "पोलीसप्रशिक्षणकेंद्रजालना",
+            "PTC Khandala": "पोलीसप्रशिक्षणकेंद्रखंडाळा",
+            "PTC Marol": "पोलीसप्रशिक्षणकेंद्रमरोळ",
+            "PTC Nanvij": "पोलीसप्रशिक्षणकेंद्रनानवीज",
+            "PTC Solapur": "पोलीसप्रशिक्षणकेंद्रसोलापूर",
+            "PTC Turchi": "पोलीसप्रशिक्षणकेंद्रतुर्ची",
+            "PTC Akola": "पोलीसप्रशिक्षणकेंद्रअकोला",
+            "PTC Latur": "पोलीसप्रशिक्षणकेंद्रलातूर",
+            "PTC Nagpur": "पोलीसप्रशिक्षणकेंद्रनागपूर",
+
+            # SRPF Groups
+            "SRPF Gr 1 Pune": "राज्यराखीवपोलीसबलगटक्रमांक१पुणे",
+            "SRPF Gr 2 Pune": "राज्यराखीवपोलीसबलगटक्रमांक२पुणे",
+            "SRPF Gr 3 Jalna": "राज्यराखीवपोलीसबलगटक्रमांक३जालना",
+            "SRPF Gr 4 Nagpur": "राज्यराखीवपोलीसबलगटक्रमांक४नागपूर",
+            "SRPF Gr 5 Daund": "राज्यराखीवपोलीसबलगटक्रमांक५दौंड",
+            "SRPF Gr 6 Dhule": "राज्यराखीवपोलीसबलगटक्रमांक६धुळे",
+            "SRPF Gr 7 Daund": "राज्यराखीवपोलीसबलगटक्रमांक७दौंड",
+            "SRPF Gr 8 Mumbai": "राज्यराखीवपोलीसबलगटक्रमांक८मुंबई",
+            "SRPF Gr 9 Amravati": "राज्यराखीवपोलीसबलगटक्रमांक९अमरावती",
+            "SRPF Gr 10 Solapur": "राज्यराखीवपोलीसबलगटक्रमांक१०सोलापूर",
+            "SRPF Gr 11 Mumbai": "राज्यराखीवपोलीसबलगटक्रमांक११मुंबई",
+            "SRPF Gr 12 Hingoli": "राज्यराखीवपोलीसबलगटक्रमांक१२हिंगोली",
+            "SRPF Gr 13 Gadchiroli": "राज्य राखीव पोलीस बल गट क्र. १३ गडचिरोली",
+            "SRPF Gr 14 Sambhajinagar": "राज्य राखीव पोलीस बल गट क्र. १४ संभाजीनगर",
+            "SRPF Gr 15 Gondia": "राज्य राखीव पोलीस बल गट क्र. १५ गोंदिया",
+            "SRPF Gr 16 Kolhapur": "राज्य राखीव पोलीस बल गट क्र. १६ कोल्हापूर",
+
+            # Special units
+            "Mahamarg Raigad": "महामार्ग रायगड",
+            "SID": "राज्य गुप्तवार्ता विभाग",
+            "ACB PUNE": "लाचलुचपत प्रतिबंधक विभाग",
+            "ACB Thane": "लाचलुचपत प्रतिबंधक विभाग",
+            "PCR": "नागरी हक्क संरक्षण",
+            "ATS": "दहशतवाद विरोधी पथक",
+            "ATS Pune": "दहशतवाद विरोधी पथक",
+            "Nashik MPA": "महाराष्ट्र पोलीस प्रबोधिनी",
+            "Force One": "फोर्स वन",
+            "CID": "गुन्हे अन्वेषण विभाग",
         }
         n = (name or "").strip()
         return m.get(n, n)
@@ -94,6 +174,10 @@ class LetterGenerator:
     def generate_letter(self, records, output_path, reference_no, letter_date):
         first = records[0]
         unit_name = self._marathi_unit(getattr(first, "police_unit", "") or "")
+
+        date_str = letter_date.strftime("%d/%m/%Y")
+        marathi_date = date_str.translate(str.maketrans("0123456789", "०१२३४५६७८९"))
+
         doc = Document()
         self._set_normal_style(doc)
 
@@ -115,34 +199,27 @@ class LetterGenerator:
         hdr.columns[1].width = Cm(5.5)
         self._remove_table_borders(hdr)
         self._set_cell(
-            hdr.cell(0, 0), 
-            "जा.क्र.सी.पी.आर./प्रलंबित प्रशिक्षण शुल्क/         /२०२६", 
+            hdr.cell(0, 0),
+            "जा.क्र.सी.पी.आर./प्रलंबित प्रशिक्षण शुल्क/         /२०२६",
             size=11,
-            bold=False, 
-            align=WD_ALIGN_PARAGRAPH.LEFT
+            bold=False,
+            align=WD_ALIGN_PARAGRAPH.LEFT,
         )
-
-        marathi_months = {
-            1: "जानेवारी", 2: "फेब्रुवारी", 3: "मार्च", 4: "एप्रिल",
-            5: "मे", 6: "जून", 7: "जुलै", 8: "ऑगस्ट",
-            9: "सप्टेंबर", 10: "ऑक्टोबर", 11: "नोव्हेंबर", 12: "डिसेंबर"
-        }
-        right_date = f"पुणे दि. {letter_date.day:02d} 
-        {marathi_months[letter_date.month]} 
-        {letter_date.year}"
         self._set_cell(
             hdr.cell(0, 1),
-              right_date, 
-              size=11, 
-              bold=False, 
-              align=WD_ALIGN_PARAGRAPH.RIGHT
+            f"पुणे दि. {marathi_date}",
+            size=11,
+            bold=False,
+            align=WD_ALIGN_PARAGRAPH.RIGHT,
         )
 
         p = doc.add_paragraph()
         p.paragraph_format.space_before = Pt(0)
         p.paragraph_format.space_after = Pt(0)
         p.add_run("प्रति,")
+
         doc.add_paragraph("मा. पोलीस अधिक्षक,")
+
         unit_p = doc.add_paragraph()
         unit_p.paragraph_format.space_before = Pt(0)
         unit_p.paragraph_format.space_after = Pt(0)
@@ -160,7 +237,9 @@ class LetterGenerator:
 
         body = doc.add_paragraph()
         body.paragraph_format.space_after = Pt(0)
-        body.add_run("उपरोक्त विषय व संदर्भान्वये अनुसरून पोलीस संशोधन केंद्र, पुणे येथे मा. पोलीस महासंचालक, महाराष्ट्र राज्य, मुंबई यांच्या निर्देशानुसार महाराष्ट्र पोलीस दलातील पोलीस अधीक्षक ते पोलीस उप निरीक्षक दर्जाचे अधिकारी यांचे करीता नियमित सीपीआर येथे वेगवेगळ्या विषयांवर पोलीस सेवेमधील अधिका-यांसाठी प्रशिक्षण आयोजित होत असतात. आपल्या घटकातील अधिका-यांनी आर्थिक वर्ष २०२६-२०२७ मधील खालील तक्त्यातील विषयांवर प्रशिक्षण घेतलेले असून त्यांचे प्रशिक्षण रक्कम येणे बाकी आहे.")
+        body.add_run(
+            "उपरोक्त विषय व संदर्भान्वये अनुसरून पोलीस संशोधन केंद्र, पुणे येथे मा. पोलीस महासंचालक, महाराष्ट्र राज्य, मुंबई यांच्या निर्देशानुसार महाराष्ट्र पोलीस दलातील पोलीस अधीक्षक ते पोलीस उप निरीक्षक दर्जाचे अधिकारी यांचे करीता नियमित सीपीआर येथे वेगवेगळ्या विषयांवर पोलीस सेवेमधील अधिका-यांसाठी प्रशिक्षण आयोजित होत असतात. आपल्या घटकातील अधिका-यांनी आर्थिक वर्ष २०२६-२०२७ मधील खालील तक्त्यातील विषयांवर प्रशिक्षण घेतलेले असून त्यांचे प्रशिक्षण रक्कम येणे बाकी आहे."
+        )
 
         table = doc.add_table(rows=1, cols=6)
         table.style = "Table Grid"
@@ -173,29 +252,44 @@ class LetterGenerator:
             row = table.add_row().cells
             self._set_cell(row[0], str(i), size=10)
             self._set_cell(row[1], f"{r.course_name} {r.batch_session}".strip(), size=10)
-            self._set_cell(row[2], f"{r.from_date.strftime('%d/%m/%Y') if r.from_date else ''} ते {r.to_date.strftime('%d/%m/%Y') if r.to_date else ''}", size=10)
+            self._set_cell(
+                row[2],
+                f"{r.from_date.strftime('%d/%m/%Y') if r.from_date else ''} ते {r.to_date.strftime('%d/%m/%Y') if r.to_date else ''}",
+                size=10,
+            )
             self._set_cell(row[3], r.officer_name, size=10)
             self._set_cell(row[4], self.fmt_money(r.total_fee), size=10)
-            self._set_cell(row[5], reference_no, size=10)
+            self._set_cell(row[5], str(reference_no).strip(), size=10)
+
+        doc.add_paragraph(
+            "सदर प्रशिक्षणासाठी आपले घटकाकडून वरील प्रमाणे थकबाकी रक्कम अद्याप पोलीस संशोधन केंद्र पुणे या कार्यालयास प्राप्त झालेली नाही."
+        )
 
         total = sum(r.total_fee for r in records)
-        tp = doc.add_paragraph()
-        tp.paragraph_format.space_before = Pt(4)
-        tp.paragraph_format.space_after = Pt(0)
-        tr = tp.add_run("एकूण")
-        self._set_font(tr, bold=True)
-        tr2 = tp.add_run(f" {self.fmt_money(total)}/-")
-        self._set_font(tr2, bold=True)
 
-        doc.add_paragraph("सदर प्रशिक्षणासाठी आपले घटकाकडून वरील प्रमाणे थकबाकी रक्कम अद्याप पोलीस संशोधन केंद्र पुणे या कार्यालयास प्राप्त झालेली नाही.")
-        doc.add_paragraph("प्रती प्रशिक्षणार्थी प्रती दिवस रू.२०००/- या प्रमाणे एकूण रक्कम रू. १०,०००/-या प्रमाणे प्रशिक्षण शुल्क पोलीस संशोधन केंद्र पुणे (CPR Pune) या नावाने धनादेश अथवा खालील बँक खात्यामध्ये RTGS / NEFT ने जमा करण्यास आणि त्याची माहिती directorcprpune@gmail.com या ई-मेलवर पाठविण्याची विनंती आहे.")
+        doc.add_paragraph(
+            f"प्रती प्रशिक्षणार्थी प्रती दिवस रू.२०००/- या प्रमाणे एकूण रक्कम रू. {self.fmt_money_marathi(total)}/- या प्रमाणे प्रशिक्षण शुल्क पोलीस संशोधन केंद्र पुणे (CPR Pune) या नावाने धनादेश अथवा खालील बँक खात्यामध्ये RTGS / NEFT ने जमा करण्यास आणि त्याची माहिती directorcprpune@gmail.com या ई-मेलवर पाठविण्याची विनंती आहे."
+        )
 
-        bank = doc.add_table(rows=1, cols=2)
+        doc.add_paragraph(
+            "तसेच वर नमुद पोलीस अधिकारी यांचे प्रशिक्षण शुल्क यापूर्वी NEFT/RTGS/ धनादेश ई. व्दारे जमा केले असल्यास UTR क्रमांक, दिनांक, पोलीस अधिकारी यांचे नाव प्रशिक्षण शुल्क ई. माहिती directorcprpune@gmail.com या ई-मेलवर तात्काळ पाठविण्याची विनंती आहे."
+        )
+
+        doc.add_paragraph(
+            "तरी सदर थकीत प्रशिक्षण फी रक्कम पोलीस संशोधन केंद्र पुणे येथे तातडीने पाठविण्याची विनंती आहे."
+        )
+
+        doc.add_paragraph(
+            "सोबतः- वर नमुद इन व्हॉईस नंबर प्रमाणे प्रशिक्षण फी Demand Note/Invoice जोडलेले आहे."
+        )
+
+        bank = doc.add_table(rows=1, cols=3)
         bank.style = "Table Grid"
-        bank.alignment = WD_TABLE_ALIGNMENT.LEFT
-        bank.autofit = False
-        self._set_cell(bank.rows[0].cells[0], "Field", size=10, bold=True, align=WD_ALIGN_PARAGRAPH.CENTER)
-        self._set_cell(bank.rows[0].cells[1], "Value", size=10, bold=True, align=WD_ALIGN_PARAGRAPH.CENTER)
+        bank.alignment = WD_TABLE_ALIGNMENT.CENTER
+        self._set_cell(bank.rows[0].cells[0], "अ.क्र", size=10, bold=True)
+        self._set_cell(bank.rows[0].cells[1], "Field", size=10, bold=True)
+        self._set_cell(bank.rows[0].cells[2], "Value", size=10, bold=True)
+
         bank_rows = [
             ("1", "Name", "CPR, Pune"),
             ("2", "Account No", "10023971530"),
@@ -210,10 +304,9 @@ class LetterGenerator:
         ]
         for no, field, val in bank_rows:
             row = bank.add_row().cells
-            self._set_cell(row[0], f"{no} {field}", size=10, align=WD_ALIGN_PARAGRAPH.LEFT)
-            self._set_cell(row[1], val, size=10, align=WD_ALIGN_PARAGRAPH.LEFT)
-
-        doc.add_paragraph("वरील प्रमाणे थकबाकी प्रशिक्षण शुल्क तत्काळ अदा करण्याची विनंती आहे.")
+            self._set_cell(row[0], no, size=10, align=WD_ALIGN_PARAGRAPH.CENTER)
+            self._set_cell(row[1], field, size=10, align=WD_ALIGN_PARAGRAPH.LEFT)
+            self._set_cell(row[2], val, size=10, align=WD_ALIGN_PARAGRAPH.LEFT)
 
         sig = doc.add_paragraph()
         sig.paragraph_format.space_before = Pt(4)

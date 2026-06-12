@@ -2,6 +2,7 @@ from io import BytesIO
 import pandas as pd
 from src.models import TrainingRecord
 
+
 class ExcelReader:
     def __init__(self, file_obj):
         self.file_obj = file_obj
@@ -30,52 +31,52 @@ class ExcelReader:
         return df, sheet_name
 
     def read_training_records(self):
-    df, _ = self._load_dataframe()
-    if df.empty:
-        return []
+        df, _ = self._load_dataframe()
+        if df.empty:
+            return []
 
-    records = []
-    for _, row in df.iterrows():
-        officer_name = str(row.get("Officer Name", "")).strip()
-        if not officer_name or officer_name.lower() == "nan":
-            first = str(row.get("First Name", "")).strip()
-            middle = str(row.get("Middle Name", "")).strip()
-            surname = str(row.get("Surname", "")).strip()
-            officer_name = " ".join([p for p in [first, middle, surname] if p and p.lower() != "nan"]).strip()
+        records = []
+        for _, row in df.iterrows():
+            officer_name = str(row.get("Officer Name", "")).strip()
+            if not officer_name or officer_name.lower() == "nan":
+                first = str(row.get("First Name", "")).strip()
+                middle = str(row.get("Middle Name", "")).strip()
+                surname = str(row.get("Surname", "")).strip()
+                officer_name = " ".join([p for p in [first, middle, surname] if p and p.lower() != "nan"]).strip()
 
-        police_unit = str(row.get("Police Unit Final", row.get("Name of Unit", ""))).strip()
-        if not police_unit or police_unit.lower() == "nan":
-            police_unit = str(row.get("(If not in the list then) Unit Name", "")).strip()
+            police_unit = str(row.get("Police Unit Final", row.get("Name of Unit", ""))).strip()
+            if not police_unit or police_unit.lower() == "nan":
+                police_unit = str(row.get("(If not in the list then) Unit Name", "")).strip()
 
-        rank = str(row.get("Rank", "")).strip()
-        sevarth_id = str(row.get("Sevarth ID", row.get("Sevarth ID (Must)", ""))).strip()
+            rank = str(row.get("Rank", "")).strip()
+            sevarth_id = str(row.get("Sevarth ID", row.get("Sevarth ID (Must)", ""))).strip()
 
-        if not officer_name or not police_unit:
-            continue
+            if not officer_name or not police_unit:
+                continue
 
-        from_date = pd.to_datetime(row.get("From Date"), dayfirst=True, errors="coerce").date() if pd.notna(row.get("From Date")) else None
-        to_date = pd.to_datetime(row.get("To Date"), dayfirst=True, errors="coerce").date() if pd.notna(row.get("To Date")) else None
+            from_date = pd.to_datetime(row.get("From Date"), dayfirst=True, errors="coerce").date() if pd.notna(row.get("From Date")) else None
+            to_date = pd.to_datetime(row.get("To Date"), dayfirst=True, errors="coerce").date() if pd.notna(row.get("To Date")) else None
 
-        duration_days = (to_date - from_date).days + 1 if from_date and to_date else 0
-        fee_per_day = 2000
-        total_fee = duration_days * fee_per_day
+            duration_days = (to_date - from_date).days + 1 if from_date and to_date else 0
+            fee_per_day = 2000
+            total_fee = duration_days * fee_per_day
 
-        records.append(TrainingRecord(
-            officer_name=officer_name,
-            rank=rank,
-            buckle_no=sevarth_id,
-            police_unit=police_unit,
-            district=str(row.get("District/Unit Address", "")).strip(),
-            unit_head_designation=str(row.get("Unit Head", "")).strip(),
-            course_name=str(row.get("Course Name", row.get("Training", ""))).strip(),
-            batch_session=str(row.get("Batch / Session", "")).strip(),
-            from_date=from_date,
-            to_date=to_date,
-            duration_days=duration_days,
-            fee_per_day=fee_per_day,
-            total_fee=total_fee,
-            reference_no=str(row.get("Reference No", "")).strip(),
-            financial_year=str(row.get("Financial Year", "")).strip(),
-            additional_notes=str(row.get("Additional Notes", "")).strip(),
-        ))
-    return records
+            records.append(TrainingRecord(
+                officer_name=officer_name,
+                rank=rank,
+                buckle_no=sevarth_id,
+                police_unit=police_unit,
+                district=str(row.get("District/Unit Address", "")).strip(),
+                unit_head_designation=str(row.get("Unit Head", "")).strip(),
+                course_name=str(row.get("Course Name", row.get("Training", ""))).strip(),
+                batch_session=str(row.get("Batch / Session", "")).strip(),
+                from_date=from_date,
+                to_date=to_date,
+                duration_days=duration_days,
+                fee_per_day=fee_per_day,
+                total_fee=total_fee,
+                reference_no=str(row.get("Reference No", "")).strip(),
+                financial_year=str(row.get("Financial Year", "")).strip(),
+                additional_notes=str(row.get("Additional Notes", "")).strip(),
+            ))
+        return records

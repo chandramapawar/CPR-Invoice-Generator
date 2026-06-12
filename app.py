@@ -31,7 +31,7 @@ course_options = [
     "Preparatory Course on Cyber Crime",
 ]
 
-course_title = st.selectbox("Course Name", course_options)
+course_title = st.text_input("Course Name")
 
 col1, col2 = st.columns(2)
 with col1:

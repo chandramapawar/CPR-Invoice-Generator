@@ -76,6 +76,7 @@ class InvoiceGenerator:
         total = sum(r.total_fee for r in records)
         unit_name = first.police_unit.strip()
         ref = f"OW/CPR/{unit_name}/        /2026"
+        inv_str = f"CPR/INV/2026/{invoice_no}"
 
         doc = Document()
         sec = doc.sections[0]
@@ -93,8 +94,20 @@ class InvoiceGenerator:
         hdr = doc.add_table(rows=1, cols=2)
         hdr.alignment = WD_TABLE_ALIGNMENT.CENTER
         hdr.autofit = True
-        self._set_cell(hdr.cell(0, 0), "Invoice", size=11, bold=True, align=WD_ALIGN_PARAGRAPH.LEFT)
-        self._set_cell(hdr.cell(0, 1), f"Date: {invoice_date.strftime('%d-%m-%Y')}", size=11, bold=True, align=WD_ALIGN_PARAGRAPH.RIGHT)
+        self._set_cell(
+            hdr.cell(0, 0),
+            f"Invoice  No: {inv_str}",
+            size=11,
+            bold=True,
+            align=WD_ALIGN_PARAGRAPH.LEFT,
+        )
+        self._set_cell(
+            hdr.cell(0, 1),
+            f"Date: {invoice_date.strftime('%d-%m-%Y')}",
+            size=11,
+            bold=True,
+            align=WD_ALIGN_PARAGRAPH.RIGHT,
+        )
         for c in hdr.rows[0].cells:
             self._set_cell_margins(c)
 
@@ -149,7 +162,7 @@ class InvoiceGenerator:
         sig = doc.add_paragraph()
         sig.paragraph_format.space_before = Pt(4)
         sig.paragraph_format.space_after = Pt(0)
-        sig.alignment = WD_ALIGN_PARAGRAPH.LEFT
+        sig.alignment = WD_ALIGN_PARAGRAPH.RIGHT
         rr = sig.add_run("(Dr. Kakasaheb Dole)\nSuperintendent of Police\nCentre for Police Research, Pune")
         self._set_font(rr, size=11)
 
